@@ -97,6 +97,10 @@ sourceY = {0, marginTop,  height - marginBottom,  height}
 | `panel.svg` | 56×56 | 14px | `InputPanel/Background/Margin` = 14 |
 | `highlight.svg` | 32×32 | 8px | `InputPanel/Highlight/Margin` = 8 |
 
+对比渲染（左 = 朴素拉伸，圆角被拉成椭圆；右 = 九宫格，圆角保持圆润）：
+
+![九宫格对比](docs/nine-slice-highlight.png)
+
 ## 目录结构
 
 ```
@@ -111,10 +115,50 @@ sourceY = {0, marginTop,  height - marginBottom,  height}
 ├── rime/
 │   └── default.custom.yaml       Rime 配置补丁
 ├── scripts/
-│   └── preview.py                离屏渲染主题预览图
+│   ├── verify.sh                 端到端验证（四项检查）
+│   ├── trace-config-load.sh      证明守护进程读取了主题文件
+│   ├── rime-probe.c              librime API 探针，读回生效的配置值
+│   ├── nine-slice-preview.py     九宫格 vs 朴素拉伸 对比渲染
+│   └── preview.py                候选窗离屏预览
 └── docs/
     ├── preview-wechat.png
     └── preview-wechat-dark.png
+```
+
+## 验证
+
+```bash
+./scripts/verify.sh
+```
+
+四项检查，全部通过才算真的生效：
+
+| 检查 | 手段 | 断言 |
+|---|---|---|
+| 1. 守护进程读取了主题 | `strace` 追踪 `openat` | 返回 fd ≥ 0（而非 `ENOENT`） |
+| 2. Rime 补丁生效 | 编译运行 librime 探针 | `page_size=5`、`select_keys=1234567890` |
+| 3. 预览已生成 | 检查 PNG 存在 | 人工确认圆角与对比度 |
+| 4. 安装往返正常 | 安装 → 卸载 → 安装 | 卸载后配置逐字节还原 |
+
+> 「安装脚本说成功了」不等于「配置生效了」。第 1 项证明文件被读取，
+> 第 2 项证明读回的值是补丁后的值而非默认值。
+
+### 单独使用各脚本
+
+```bash
+# 证明 fcitx5 真的读了主题文件
+scripts/trace-config-load.sh "fcitx5 --replace" "$HOME/.local/share/fcitx5/themes/wechat/theme.conf"
+
+# 编译并运行 Rime 探针
+gcc -o /tmp/rime-probe scripts/rime-probe.c /usr/lib/x86_64-linux-gnu/librime.so
+/tmp/rime-probe
+
+# 对比九宫格与朴素拉伸，检查圆角是否变形
+scripts/nine-slice-preview.py --svg themes/wechat/highlight.svg --margin 8 \
+    --width 300 --height 30 --out /tmp/hl.png
+
+# 生成候选窗预览
+python3 scripts/preview.py --theme wechat
 ```
 
 ## Rime 补丁说明
