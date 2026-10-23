@@ -40,7 +40,7 @@ sudo apt install fcitx5 fcitx5-rime fonts-noto-cjk
 ## 快速开始
 
 ```bash
-git clone https://github.com/ubuntu26/ubuntu26-wechat-theme-fcitx5.git
+git clone https://github.com/yzc514-bot/ubuntu26-wechat-theme-fcitx5.git
 cd ubuntu26-wechat-theme-fcitx5
 ./install.sh
 ```

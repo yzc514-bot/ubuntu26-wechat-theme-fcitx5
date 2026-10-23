@@ -50,8 +50,9 @@ fi
 echo "登录身份：$LOGIN"
 
 # ── 确定仓库 slug ─────────────────────────────────────────────
+# 默认使用本仓库的规范地址；可用 --repo 覆盖
 if [ -z "$REPO_SLUG" ]; then
-    REPO_SLUG="$LOGIN/ubuntu26-wechat-theme-fcitx5"
+    REPO_SLUG="yzc514-bot/ubuntu26-wechat-theme-fcitx5"
 fi
 REPO_NAME="${REPO_SLUG#*/}"
 
