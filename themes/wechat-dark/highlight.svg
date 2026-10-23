@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 选中候选的微信绿圆角底（九宫格）。深浅色共用。
+     尺寸 32x32，圆角半径 8px，与 theme.conf 中
+     [InputPanel/Highlight/Margin] 的 8px 边界严格一致。 -->
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect x="0" y="0" width="32" height="32" rx="8" ry="8" fill="#07C160"/>
+</svg>

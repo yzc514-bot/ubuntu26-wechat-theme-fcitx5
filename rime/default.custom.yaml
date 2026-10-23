@@ -1,0 +1,43 @@
+# Rime 配置补丁 —— 仿微信输入法（fcitx5 + rime）
+#
+# 本文件由 ubuntu26-wechat-theme-fcitx5 安装脚本部署为
+#   ~/.local/share/fcitx5/rime/default.custom.yaml
+#
+# 注意：fcitx5-rime 前端只读取 default.yaml（及 fcitx5.yaml），
+# 不读取 squirrel.yaml —— 候选窗的配色与圆角由 fcitx5 classicui 主题负责，
+# 参见 themes/wechat/theme.conf。
+#
+# 这里仅调整「与外观相关、且确实由 rime 决定」的部分：
+#   - 菜单候选数（微信风格一屏 5 个）
+#   - 预编辑内联显示
+#   - 注释（拼音/英文提示）格式
+#
+# 用法：直接整份替换默认配置，或与其它补丁合并。
+
+patch:
+  # ── 候选菜单 ────────────────────────────────────────────────
+  menu:
+    # 一页显示 5 个候选词，与微信输入法一致
+    page_size: 5
+    # 数字键直接选词（微信输入法行为：直接按 1-5 上屏）
+    # 注意：一旦设置 alternative_select_labels，select_keys 就会变为空，
+    # 因此必须同时显式声明 alternative_select_keys，否则数字键无法选词。
+    alternative_select_keys: "1234567890"
+    # 候选词标签显示为数字序号
+    alternative_select_labels: [1, 2, 3, 4, 5]
+
+  # ── 预编辑 ──────────────────────────────────────────────────
+  # true = 拼音串显示在输入框光标处（内联），false = 只在候选窗显示
+  # 微信输入法采用内联 + 候选窗双显，这里保留内联。
+  inline_preedit: true
+
+  # ── 组合态注释 ──────────────────────────────────────────────
+  # 候选词下方显示注释（拼音/英文）
+  comment_format:
+    comment_format: "〔$1〕"
+
+  # ── 方案切换 ────────────────────────────────────────────────
+  switcher:
+    # 折叠显示，避免候选窗过高
+    fold_options: true
+    abbreviate_options: true
