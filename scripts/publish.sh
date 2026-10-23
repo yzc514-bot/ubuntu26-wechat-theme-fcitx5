@@ -63,8 +63,21 @@ if [ "$DRY_RUN" -eq 1 ]; then
 fi
 
 # ── 确认仓库不存在，存在则跳过创建 ───────────────────────────
-if curl -s -H "Authorization: token $TOKEN" \
-    "https://api.github.com/repos/$REPO_SLUG" | grep -q '"full_name"'; then
+# 用 python 解析 JSON，避免 grep 在 set -e 下因管道提前退出的边界问题
+repo_exists() {
+    curl -s -H "Authorization: token $TOKEN" \
+        "https://api.github.com/repos/$REPO_SLUG" \
+    | python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
+sys.exit(0 if d.get('full_name') else 1)
+"
+}
+
+if repo_exists; then
     echo "仓库已存在：$REPO_SLUG（跳过创建）"
 else
     echo "创建仓库：$REPO_SLUG"
@@ -72,10 +85,17 @@ else
         -H "Accept: application/vnd.github+json" \
         -d "{\"name\":\"$REPO_NAME\",\"description\":\"仿微信输入法的 fcitx5 + Rime 主题，一键安装\",\"private\":false,\"has_issues\":true,\"has_wiki\":false}" \
         https://api.github.com/user/repos)"
-    if echo "$RESP" | grep -q '"full_name"'; then
+    if printf '%s' "$RESP" | python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    sys.exit(1)
+sys.exit(0 if d.get('full_name') else 1)
+"; then
         echo "  ✓ 创建成功"
     else
-        echo "  ✗ 创建失败：$(echo "$RESP" | head -c 300)" >&2
+        echo "  ✗ 创建失败：$(printf '%s' "$RESP" | head -c 300)" >&2
         exit 1
     fi
 fi
